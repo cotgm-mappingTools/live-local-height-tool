@@ -11,6 +11,31 @@ body {
   width: 100%;
 }
 
+#titleDiv, #parcelInfoDiv, #dateDiv{
+  padding: 5px 10px 5px 10px;
+  background-color: dimgrey;
+  color: azure;
+  opacity: .95;
+  border-radius: 5px;
+  box-shadow: 5px 5px 5px black;
+}
+
+#titleDiv{
+  font-size: x-large;
+  font-weight: bold;
+  
+}
+
+#parcelInfoDiv{
+  font-size: medium;
+  display: none;
+}  
+
+#dateDiv{
+  font-size: medium;
+  display: none;
+}  
+
 #table1Div, #table2Div{
   height: 30%;
   width: 350px;
@@ -28,115 +53,21 @@ body {
   bottom: 15%
 }
 
-#titleDiv, #parcelInfoDiv{
-  padding: 5px;
-  background-color: dimgrey;
-  color: azure;
-  opacity: .95;
-  border-radius: 5px;
-}
-
-#titleDiv{
-  font-size: x-large;
-  font-weight: bold;
-
-}
-
-#parcelInfoDiv{
-  font-size: medium;
-  display: none;
-}  
-
-/* vaadin-grid-sorter.esri-column__sorter > #div {
-  background-color: blueviolet;
-  width: 50px
-} */
 
 
-/* vaadin-grid-cell-content{
-  background-color: blueviolet;
-} */
-
-/* #shadow-root {
-  background-color: blueviolet;
-} */
-
-/* vaadin-grid-cell-content.esri-field-column_header-content::slotted(vaadin-grid-cell-content-3){
-  background-color: blueviolet !important;
-  width: 50px !important
-} */
-
-
-/* vaadin-grid-cell-content::slotted(vaadin-grid-cell-content-3){
-  background-color: blueviolet !important;
-  max-width: 50% !important
-} */
-
-
-
-
+/******************
+   FEATURE TABLE
+******************/
 
 /* make long Feature Table column values wrap */
 vaadin-grid-cell-content {
   white-space: normal !important;
 }
 
-/*shrinks content but not underlying grid*/
-/* vaadin-grid-sorter{
-  max-width: 40%;
-} */
-
-
-
-
-/* vaadin-grid-cell-content-2 {
-  max-width: 40% !important;
-} */
-
-
-
-/* vaadin-grid-sorter::part(content){
-  max-width: 20% !important 
-}  */
-
-/* vaadin-grid-sorter.esri-column__sorter{
-  max-width: 40% !important 
-} */
-
-/* shrunk content but not underlying grid*/
-/* vaadin-grid-cell-content.esri-field-column__header-content{
-  max-width: 40%;
-} */
-
-/* doesn't do anything on it's own*/
-/* vaadin-grid-cell-content.esri-field-column{
-  max-width: 40%;
-} */
-
-
-
-/* vaadin-grid-column {
-  width: auto;
-  display:flex;
-} */
-
-/* doesn't do anything on it's own*/
-/* vaadin-grid-cell{
-  max-width: 40%;
-} */
-
-
-
-/* th#vaadin-grid-cell-3 {
-  width: 50px 
-} */
-
-/* vaadin-grid-cell-2 {
-  max-width: 50% 
+/* hide 3 dots menu since up/down arrows do the same thing */
+div.esri-column__menu-container.esri-button-menu.esri-widget {
+  display: none;
 }
-vaadin-grid-cell-3 {
-  max-width: 50% 
-} */
 
 
 /* change featureTable font size */
@@ -144,13 +75,19 @@ vaadin-grid-cell-3 {
   font-size: .575rem !important;
 } */
 
-/* hide 3 dots menu since up/down arrows do the same thing */
-div.esri-column__menu-container.esri-button-menu.esri-widget {
-  display: none;
-}
-
-/* hide the secondary info panel of the sketch widget that pops up when user selects a parcel;
-it provides no additional functionality in this application's context */
+/* hide the secondary info panel of the sketch widget that pops up when user selects a parcel */
 /* div.esri-sketch__panel.esri-sketch__info-panel{
   display: none
+} */
+
+/* attempt #1 to adjust table column size */
+/* shrinks content but not underlying grid */
+/* vaadin-grid-sorter{
+  max-width: 40%;
+} */
+
+/* attempt #2 to adjust table column size */
+/* shrunk content but not underlying grid */
+/* vaadin-grid-cell-content.esri-field-column__header-content{
+  max-width: 40%;
 } */

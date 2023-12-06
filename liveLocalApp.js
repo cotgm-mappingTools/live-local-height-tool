@@ -86,43 +86,6 @@ require([
         });
 
 
-        //************************
-        // CREATE CONTEXT WIDGETS
-        //************************
-        const table1Div = document.getElementById("table1Div");
-        const table2Div = document.getElementById("table2Div");
-
-        const titleDiv = document.getElementById("titleDiv");
-        const parcelInfoDiv = document.getElementById("parcelInfoDiv");
-        const searchWidget = new Search({view: view});
-        const zoom = new Zoom({view: view});
-        const home = new Home({view: view});
-        const legend = new Legend({view: view});
-
-        // put the legend in an expand widget so it is hidden by default
-        const legendExpand = new Expand({
-            expandIconClass: "esri-icon-legend",
-            expandTooltip: "Legend",
-            view: view,
-            content: legend
-        });
-
-        
-        //******************
-        //  ADD UI ELEMENTS  
-        //******************
-        view.ui.empty("top-left");
-        view.ui.add(table1Div, "manual");
-        view.ui.add(table2Div, "manual");
-        view.ui.add(titleDiv, "top-left");
-        view.ui.add(parcelInfoDiv, "top-left");
-        view.ui.add(zoom, "bottom-left");
-        view.ui.add(home, "bottom-left");
-        view.ui.add(legendExpand, "bottom-right");
-        view.ui.add(searchWidget, "bottom-left",);
-        view.ui.add(sketch, "top-right");
-
-
         ////////////////////////////////////////////////////////
         //  ADD SKETCH EVENTS TO LISTEN FOR AND EXECUTE QUERY //
         ////////////////////////////////////////////////////////
@@ -144,9 +107,9 @@ require([
         });
 
         
-        /////////////////////
-        //  BUFFER LAYER  //
-        //////////////////// 
+        //*************************
+        //   CREATE BUFFER LAYER
+        //*************************
         // create layer to hold 1 mile buffer around selected parcel
         const bufferLayer = new GraphicsLayer();
         map.add(bufferLayer)
@@ -160,45 +123,79 @@ require([
             }
           };
 
+          
+        //***************************
+        //   CREATE OTHER WIDGETS
+        //***************************
+        const table1Div = document.getElementById("table1Div");
+        const table2Div = document.getElementById("table2Div");
+        const titleDiv = document.getElementById("titleDiv");
+        const parcelInfoDiv = document.getElementById("parcelInfoDiv");
+        const dateDiv = document.getElementById("dateDiv");
+        const searchWidget = new Search({view: view});
+        const zoom = new Zoom({view: view});
+        const home = new Home({view: view});
+        const legend = new Legend({view: view});
 
-        /////////////////////////////////
-        //  ADD FEATURE TABLE TO VIEW  //
-        /////////////////////////////////
-        // const featureTableContainer = document.getElementById("tableContainer");
-        // view.ui.add(featureTable, "top-right");
-        // view.ui.add(featureTableContainer, "manual");
+        // put the legend in an expand widget so it is hidden by default
+        const legendExpand = new Expand({
+            expandIconClass: "esri-icon-legend",
+            expandTooltip: "Legend",
+            view: view,
+            content: legend
+        });
+
+        
+        //***********************************
+        //   ADD WIDGETS TO USER INTERFACE  
+        //***********************************
+        view.ui.empty("top-left");
+        view.ui.add(table1Div, "manual");
+        view.ui.add(table2Div, "manual");
+        view.ui.add(titleDiv, "top-left");
+        view.ui.add(parcelInfoDiv, "top-left");
+        view.ui.add(zoom, "bottom-left");
+        view.ui.add(home, "bottom-left");
+        view.ui.add(searchWidget, "bottom-left",);
+        view.ui.add(legendExpand, "bottom-right");
+        view.ui.add(dateDiv, "bottom-right");
+        view.ui.add(sketch, "top-right");
         
 
-        //////////////////
-        //  FUNCTIONS  //
-        ///////////////// 
 
+        //************************************************************************
+        //                               FUNCTIONS  
+        //************************************************************************
+
+
+        //***********************************
         function queryParcelLayer(geometry) {
-
+            
             const parcelQuery = {
                 spatialRelationship: "intersects", // Relationship operation to apply
                 geometry: geometry,  // The sketch feature geometry
                 outFields: ["TAXID_LABE","SITEADDR","CALC_ACREA"], // Attributes to return
                 returnGeometry: true
             };
-
+            
             parcelLayer.queryFeatures(parcelQuery)
             .then((results) => {
-
-            // console.log("Feature count: " + results.features.length)
-
-            DisplayParcelResults(results);
-
+                
+                // console.log("Feature count: " + results.features.length)
+                
+                displayParcelResults(results);
+                
             }).catch((error) => {
-            console.log(error);
+                console.log(error);
             });
-
+            
         }
-
-
-        function DisplayParcelResults(results) {
-
-        // Create a blue polygon
+        
+        
+        //***********************************
+        function displayParcelResults(results) {
+            
+            // Create a blue polygon
             const symbol = {
                 type: "simple-fill",
                 color: [ 20, 130, 200, 0.5 ],
@@ -207,93 +204,94 @@ require([
                     width: .5
                 },
             };
-
+            
             // Set symbol (other feature properties can also be set here)
             results.features.map((feature) => {
-            feature.symbol = symbol;
-            feature.popupTemplate = popupTemplate
-            return feature;
+                feature.symbol = symbol;
+                feature.popupTemplate = popupTemplate
+                return feature;
             });
-
+            
             // update the parcelInfoDiv with the address & taxID of the selected parcel & make it visible
             const parcelAddress = results.features[0].attributes.SITEADDR
             const parcelID = results.features[0].attributes.TAXID_LABE        
             parcelInfoDiv.innerHTML = `<b>Showing Results for:</b> ${parcelAddress} (Tax ID: ${parcelID})`
             parcelInfoDiv.style.display = "inline"
-
-
+            
+            
             // create the buffer around the parcel
-            BufferParcel(results.features[0].geometry);
-
+            bufferParcel(results.features[0].geometry);
+            
             // Clear display
             // view.closePopup();
             view.graphics.removeAll();
-
+            
             // Add features to graphics layer
             view.graphics.addMany(results.features);
-
+            
         }
-
-
-        function BufferParcel(results) {
-
+        
+        
+        //***********************************
+        function bufferParcel(results) {
+            
             // calculate the 1 mile buffer & recenter the map on it 
             const buffer = geometryEngine.geodesicBuffer(results, 1, "miles");
             const lon = buffer.centroid.longitude
             const lat = buffer.centroid.latitude
             view.center = [lon, lat];
             view.zoom = 15
-
+            
             // create or update the buffer circle graphic
             if(bufferLayer.graphics.length === 0){ //if it doesn't exist, create it
-              bufferLayer.add(
-                new Graphic({
-                  geometry: buffer,
-                  symbol: bufferSym
-                })
-              );
-            } else { //if it already exists, update the geometry attribute
-              const graphic = bufferLayer.graphics.getItemAt(0);
-              graphic.geometry = buffer;
-            }
+                bufferLayer.add(
+                    new Graphic({
+                        geometry: buffer,
+                        symbol: bufferSym
+                    })
+                    );
+                } else { //if it already exists, update the geometry attribute
+                    const graphic = bufferLayer.graphics.getItemAt(0);
+                    graphic.geometry = buffer;
+                }
+                
+                // find the zoning districts that intersect with the buffer
+                queryHeightLayer(buffer)
+                
+            } // END BufferParcel()
+            
+            
 
-            // find the zoning districts that intersect with the buffer
-            QueryHeightLayer(buffer)
+            //***********************************
+            function queryHeightLayer(buffer) {
+                
+                const heightQuery = {
+                    spatialRelationship: "intersects", // Relationship operation to apply
+                    geometry: buffer,  
+                    outFields: ["OBJECTID","ZONED", "ZONING", "Height_Name", "Height_Stories", "Height_Feet"], // Attributes to return
+                    returnGeometry: true
+                };
+                
+                heightLayer.queryFeatures(heightQuery)
+                .then((results) => {
+                    
+                    // console.log("Feature count: " + results.features.length)
+                    
+                    displayHeightResults(results);
+                    
+                }).catch((error) => {
+                    console.log(error);
+                });
+                
+            } // END QueryHeightLayer
+            
+            
 
-        } // END BufferParcel()
-        
-
-        function QueryHeightLayer(buffer) {
-
-            const heightQuery = {
-                spatialRelationship: "intersects", // Relationship operation to apply
-                geometry: buffer,  
-                outFields: ["OBJECTID","ZONED", "ZONING", "Height_Name", "Height_Stories", "Height_Feet"], // Attributes to return
-                returnGeometry: true
-            };
-
-            heightLayer.queryFeatures(heightQuery)
-            .then((results) => {
-
-            // console.log("Feature count: " + results.features.length)
-
-            DisplayHeightResults(results);
-
-            }).catch((error) => {
-            console.log(error);
-            });
-
-        } // END QueryHeightLayer
-
-
-        // DISPLAY HEIGHT RESULTS
-        // need to first set global variables for use in DisplayHeightResults()
-        let initialMapLayersLength = map.layers.length
-        let featureTable
-        let featureTable2
-        function DisplayHeightResults(results) {
-
-            // Create polygon symbols
+            //***********************************
+            let initialMapLayersLength = map.layers.length //global variable needed in function
+            function displayHeightResults(results) {
+                
+                // Create polygon symbols
                 const symbol = {
                     type: "simple-fill",
                     color: [ 120, 130, 200, 0.5 ],
@@ -370,102 +368,92 @@ require([
 
                 map.add(resultsHeightLayer)
 
+                makeFeatureTables(resultsHeightLayer)
 
-                //////////////////////
-                // add FeatureTable //
-                //////////////////////                   
-                    
+            } // END displayHeightResults()
+
+            
+            
+            //***********************************
+            let featureTable, featureTable2 //global variables needed in function
+            function makeFeatureTables(resultsHeightLayer){
+
                 const featureLayer = resultsHeightLayer
                 featureLayer.title = "Allowed Heights";
+                
 
+                // **********************************
+                //   CREATE FEATURE TABLE 1 (Feet) 
+                // **********************************
+                // create the table if this is a new query & update layer data if it is a repeat query
                 if (featureTable === undefined) { //the Feature Table doesn't yet exist
                     // Create the feature table
                     featureTable = new FeatureTable({
-                        view: view, // Required for feature highlight to work
                         layer: featureLayer,
+                        container: table1Div,
+                        view: view, // Required for feature highlight to work
                         multiSortEnabled: true,
                         visibleElements: {
-                        // Autocast to VisibleElements
-                        menuItems: {
-                            clearSelection: true,
-                            refreshData: true,
-                            toggleColumns: true,
-                            selectedRecordsShowAllToggle: true,
-                            selectedRecordsShowSelectedToggle: true,
-                            zoomToSelection: true
-                        }
+                            header: false
                         },
                         tableTemplate: {
-                        columnTemplates: [
-                            {
+                            columnTemplates: [
+                                {
+                                    type: "field",
+                                    fieldName: "Height_Name",
+                                    label: "District Name",
+                                    direction: "asc",
+                                    initialSortPriority: 1  
+                                },
+                                {
+                                    type: "field",
+                                    fieldName: "Height_feet",
+                                    label: "Feet",
+                                    direction: "desc",
+                                    initialSortPriority: 0 
+                                },
+                            ]
+                        },
+                    });
+                    
+                }                
+                else { // the Feature Table already exists
+                    // redefine the layer property to use the newest set of queried zoning district features
+                    featureTable.layer = featureLayer
+                } // end 
+                
+
+                // *************************************
+                //   CREATE FEATURE TABLE 2 (Stories)
+                // *************************************
+                if (featureTable2 === undefined) { //the Feature Table doesn't yet exist
+                    // Create the feature table
+                    featureTable2 = new FeatureTable({
+                        view: view,
+                        layer: featureLayer,
+                        container: table2Div,
+                        multiSortEnabled: true,
+                        visibleElements: {
+                            header: false
+                        },
+                        tableTemplate: {
+                            columnTemplates: [
+                                {
                                 type: "field",
                                 fieldName: "Height_Name",
                                 label: "District Name",
                                 direction: "asc",  //have to specify this to use initialSortPriority
                                 initialSortPriority: 1  //sort by this column second 
-                            },
-                            {
+                                },
+                                {
                                 type: "field",
-                                fieldName: "Height_feet",
-                                label: "Feet",
+                                fieldName: "Height_Stories",
+                                label: "Stories", 
                                 direction: "desc",  //have to specify this to use initialSortPriority
-                                initialSortPriority: 0  //sort by this column first 
-                            },
-                        ]
+                                initialSortPriority: 0  //sort by this column second 
+                                },
+                            ]
                         },
-                        visibleElements: {
-                            header: false
-                        },
-                        // container: document.getElementById("tableDiv")
-                        container: table1Div
-                    });
-
-                }                
-                else { // the Feature Table already exists
-                    // redefine the layer property to use the newest set of queried zoning district features
-                    featureTable.layer = featureLayer
-                }
-
-                if (featureTable2 === undefined) { //the Feature Table doesn't yet exist
-                    // Create the feature table
-                    featureTable2 = new FeatureTable({
-                        view: view, // Required for feature highlight to work
-                        layer: featureLayer,
-                        multiSortEnabled: true,
-                        visibleElements: {
-                        // Autocast to VisibleElements
-                        menuItems: {
-                            clearSelection: true,
-                            refreshData: true,
-                            toggleColumns: true,
-                            selectedRecordsShowAllToggle: true,
-                            selectedRecordsShowSelectedToggle: true,
-                            zoomToSelection: true
-                        }
-                        },
-                        tableTemplate: {
-                        columnTemplates: [
-                            {
-                            type: "field",
-                            fieldName: "Height_Name",
-                            label: "District Name",
-                            direction: "asc",  //have to specify this to use initialSortPriority
-                            initialSortPriority: 1  //sort by this column second 
-                            },
-                            {
-                            type: "field",
-                            fieldName: "Height_Stories",
-                            label: "Stories", 
-                            direction: "desc",  //have to specify this to use initialSortPriority
-                            initialSortPriority: 0  //sort by this column second 
-                            },
-                        ]
-                        },
-                        visibleElements: {
-                            header: false
-                        },
-                        // container: document.getElementById("tableDiv2")
-                        container: table2Div
                     });
                 }
                 else { // the Feature Table already exists
@@ -475,6 +463,7 @@ require([
 
                 table1Div.style.display = "flex"
                 table2Div.style.display = "flex"
-            } // END DisplayHeightResults
+                
+            } // END makeFeatureTables
 
 }); // END main function

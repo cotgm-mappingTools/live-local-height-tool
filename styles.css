@@ -15,7 +15,7 @@ body {
   padding: 5px 10px 5px 10px;
   background-color: dimgrey;
   color: azure;
-  opacity: .95;
+  opacity: .98;
   border-radius: 5px;
   box-shadow: 5px 5px 5px black;
 }
@@ -69,15 +69,14 @@ div.esri-column__menu-container.esri-button-menu.esri-widget {
   display: none;
 }
 
+/* hide the secondary info panel of the sketch widget that pops up when user selects a parcel */
+div.esri-sketch__panel.esri-sketch__info-panel{
+  display: none
+} 
 
 /* change featureTable font size */
 /* vaadin-grid-cell-content {
   font-size: .575rem !important;
-} */
-
-/* hide the secondary info panel of the sketch widget that pops up when user selects a parcel */
-/* div.esri-sketch__panel.esri-sketch__info-panel{
-  display: none
 } */
 
 /* attempt #1 to adjust table column size */

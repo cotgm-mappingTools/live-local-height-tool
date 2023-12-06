@@ -14,39 +14,43 @@ require([
       "esri/widgets/Expand",
       "esri/widgets/Zoom",
       "esri/widgets/Search",
+      "esri/widgets/ScaleBar",
 
-    // ], function(Map, MapView, Sketch, GraphicsLayer, FeatureLayer, Graphic, geometryEngine, FeatureTable) {
-    ], function(Map, MapView, Sketch, GraphicsLayer, FeatureLayer, Graphic, geometryEngine, FeatureTable, Legend, Home, Expand, Zoom, Search) {
-    // ], function(esriConfig, Map, MapView, Sketch, GraphicsLayer, FeatureLayer) {
+    ], function(Map, MapView, Sketch, GraphicsLayer, FeatureLayer, Graphic, geometryEngine, FeatureTable, Legend, Home, Expand, Zoom, Search, ScaleBar) {
 
-    //   esriConfig.apiKey = "AAPKca1f45d956a14bdfbd8ad8a0186ae048IvxPIJeyEVNq7JGkJZw0Ey0VNHFNeL6ucTIHLCS9oDIxxLUwVAZEyAfLTohkzpOi";
+        // need to enable "esri/config" if this is used        
+        // esriConfig.apiKey = "AAPKca1f45d956a14bdfbd8ad8a0186ae048IvxPIJeyEVNq7JGkJZw0Ey0VNHFNeL6ucTIHLCS9oDIxxLUwVAZEyAfLTohkzpOi";
+        
+
+        //*************************
+        //   MAKE FEATURE LAYERS  
+        //*************************
 
         const popupTemplate = {
             title: "Parcel {TAXID_LABE}",
             content: "Site Address: {SITEADDR} <br> Acreage: {CALC_ACREA}"
         };
 
-        const parcelLayer = new FeatureLayer({ // authoritative layer
-            url: "https://intervector.leoncountyfl.gov/intervector/rest/services/MapServices/TLC_OverlayParnal_D_WM/MapServer/0",
-            popupTemplate: popupTemplate,
-        });
-        // const parcelLayer = new FeatureLayer({ // city only (my test layer)
-        //     url: "https://services.arcgis.com/ptvDyBs1KkcwzQNJ/arcgis/rest/services/PropertyParcel_CityOnly_112823/FeatureServer",
+        // const parcelLayer = new FeatureLayer({ // authoritative layer
+        //     url: "https://intervector.leoncountyfl.gov/intervector/rest/services/MapServices/TLC_OverlayParnal_D_WM/MapServer/0",
         //     popupTemplate: popupTemplate,
         // });
+        const parcelLayer = new FeatureLayer({ // city only (my test layer)
+            url: "https://services.arcgis.com/ptvDyBs1KkcwzQNJ/arcgis/rest/services/PropertyParcel_CityOnly_112823/FeatureServer",
+            popupTemplate: popupTemplate,
+        });
 
         const heightLayer = new FeatureLayer({
             url: "https://services.arcgis.com/ptvDyBs1KkcwzQNJ/arcgis/rest/services/zoning_heights_MultipartToSi/FeatureServer",
             visible: false,
-            title: "Allowed Heights"
-            // visible: false
+            title: "Allowed Heights",
+            visible: false
         });
 
-        //////////////////////////
-        //  CREATE MAP & VIEW  //
-        /////////////////////////
-        let selectionIdCount = 0; // The filtered selection id count
-        let candidate; // The graphic accessed via the view.click event
+        
+        //***********************
+        //   CREATE MAP & VIEW  
+        //***********************
 
         const map = new Map({
             basemap: "streets-relief-vector",
@@ -63,9 +67,10 @@ require([
         });
         
         
-        /////////////////////////
-        //  ADD SKETCH WIDGET  //
-        /////////////////////////
+        //***********************
+        //   ADD SKETCH WIDGET  
+        //***********************
+
         const graphicsLayerSketch = new GraphicsLayer();
         map.add(graphicsLayerSketch);
 
@@ -86,30 +91,26 @@ require([
         });
 
 
-        ////////////////////////////////////////////////////////
-        //  ADD SKETCH EVENTS TO LISTEN FOR AND EXECUTE QUERY //
-        ////////////////////////////////////////////////////////
+        //*******************************************************
+        //   ADD SKETCH EVENTS TO LISTEN FOR AND EXECUTE QUERY 
+        //*******************************************************
+
         sketch.on("update", (event) => {
 
-            // Create
             if (event.state === "start") {
                 queryParcelLayer(event.graphics[0].geometry);
             }
             if (event.state === "complete"){
-                graphicsLayerSketch.remove(event.graphics[0]); // Clear the graphic when a user clicks off of it or sketches new one
+                graphicsLayerSketch.remove(event.graphics[0]); // Clear the graphic when a user clicks off it or sketches a new one
             }
 
-            // Change
-            if (event.toolEventInfo && (event.toolEventInfo.type === "scale-stop" || event.toolEventInfo.type === "reshape-stop" || 
-            event.toolEventInfo.type === "move-stop")) {
-                queryParcelLayer(event.graphics[0].geometry);
-            }
         });
 
         
         //*************************
         //   CREATE BUFFER LAYER
         //*************************
+
         // create layer to hold 1 mile buffer around selected parcel
         const bufferLayer = new GraphicsLayer();
         map.add(bufferLayer)
@@ -145,6 +146,12 @@ require([
             content: legend
         });
 
+        // create a scale bar
+        const scaleBar = new ScaleBar({
+            view: view,
+            unit: "imperial"
+          });
+
         
         //***********************************
         //   ADD WIDGETS TO USER INTERFACE  
@@ -156,8 +163,9 @@ require([
         view.ui.add(parcelInfoDiv, "top-left");
         view.ui.add(zoom, "bottom-left");
         view.ui.add(home, "bottom-left");
+        view.ui.add(legendExpand, "bottom-left");
         view.ui.add(searchWidget, "bottom-left",);
-        view.ui.add(legendExpand, "bottom-right");
+        view.ui.add(scaleBar, "bottom-right");
         view.ui.add(dateDiv, "bottom-right");
         view.ui.add(sketch, "top-right");
         
@@ -168,7 +176,9 @@ require([
         //************************************************************************
 
 
-        //***********************************
+        //********************************
+        //   *** queryParcelLayer() ***
+        //********************************
         function queryParcelLayer(geometry) {
             
             const parcelQuery = {
@@ -180,19 +190,20 @@ require([
             
             parcelLayer.queryFeatures(parcelQuery)
             .then((results) => {
-                
-                // console.log("Feature count: " + results.features.length)
-                
+                              
                 displayParcelResults(results);
                 
             }).catch((error) => {
                 console.log(error);
             });
             
-        }
+        } // END queryParcelLayer()
         
-        
-        //***********************************
+
+
+        //**********************************
+        // *** displayParcelResults() ***
+        //**********************************
         function displayParcelResults(results) {
             
             // Create a blue polygon
@@ -217,8 +228,7 @@ require([
             const parcelID = results.features[0].attributes.TAXID_LABE        
             parcelInfoDiv.innerHTML = `<b>Showing Results for:</b> ${parcelAddress} (Tax ID: ${parcelID})`
             parcelInfoDiv.style.display = "inline"
-            
-            
+                     
             // create the buffer around the parcel
             bufferParcel(results.features[0].geometry);
             
@@ -229,10 +239,13 @@ require([
             // Add features to graphics layer
             view.graphics.addMany(results.features);
             
-        }
+        } // END displayParcelResults()
         
         
-        //***********************************
+
+        //**************************
+        //   *** bufferParcel ***
+        //**************************
         function bufferParcel(results) {
             
             // calculate the 1 mile buffer & recenter the map on it 
@@ -258,212 +271,213 @@ require([
                 // find the zoning districts that intersect with the buffer
                 queryHeightLayer(buffer)
                 
-            } // END BufferParcel()
-            
-            
+        } // END BufferParcel()
 
-            //***********************************
-            function queryHeightLayer(buffer) {
+
+            
+        //********************************
+        //   *** queryHeightLayer() ***
+        //********************************
+        function queryHeightLayer(buffer) {
+            
+            const heightQuery = {
+                spatialRelationship: "intersects", // Relationship operation to apply
+                geometry: buffer,  
+                outFields: ["OBJECTID","ZONED", "ZONING", "Height_Name", "Height_Stories", "Height_Feet"], // Attributes to return
+                returnGeometry: true
+            };
+            
+            heightLayer.queryFeatures(heightQuery)
+            .then((results) => {
                 
-                const heightQuery = {
-                    spatialRelationship: "intersects", // Relationship operation to apply
-                    geometry: buffer,  
-                    outFields: ["OBJECTID","ZONED", "ZONING", "Height_Name", "Height_Stories", "Height_Feet"], // Attributes to return
-                    returnGeometry: true
-                };
+                displayHeightResults(results);
                 
-                heightLayer.queryFeatures(heightQuery)
-                .then((results) => {
-                    
-                    // console.log("Feature count: " + results.features.length)
-                    
-                    displayHeightResults(results);
-                    
-                }).catch((error) => {
-                    console.log(error);
+            }).catch((error) => {
+                console.log(error);
+            });
+            
+        } // END QueryHeightLayer
+        
+        
+
+        //************************************
+        //   *** displayHeightResults() ***
+        //************************************
+        let initialMapLayersLength = map.layers.length //global variable needed in function
+        function displayHeightResults(results) {
+            
+            // Create polygon symbols
+            const symbol = {
+                type: "simple-fill",
+                color: [ 120, 130, 200, 0.5 ],
+                outline: {
+                    color: "white",
+                    width: .5
+                },
+            };
+
+            // set symbol (can also set pop-up here) 
+            results.features.map((feature) => {
+            feature.symbol = symbol;
+            return feature;
+            });              
+
+            // If the "Allowed Heights" layer (the one with the subset that intersects the 1 mile buffer)
+            // already exists, remove it. This will make the old subset disappear when the user clicks a new parcel.                 
+            if (map.layers.length > initialMapLayersLength) {
+                let zoningHeightLyrIndex = map.layers.findIndex(function(layer){
+                    return layer.title === "Allowed Heights";
                 });
-                
-            } // END QueryHeightLayer
-            
-            
-
-            //***********************************
-            let initialMapLayersLength = map.layers.length //global variable needed in function
-            function displayHeightResults(results) {
-                
-                // Create polygon symbols
-                const symbol = {
-                    type: "simple-fill",
-                    color: [ 120, 130, 200, 0.5 ],
-                    outline: {
+                let heightSubsetLyr = map.layers.at(zoningHeightLyrIndex);
+                map.layers.remove(heightSubsetLyr);
+            }
+                        
+            // create the new height layer from the query of which zoning districts intersect the 1 mile buffer
+            let resultsHeightLayer = new FeatureLayer({
+                source: results.features,
+                objectIdField: "OBJECTID",
+                geometryType: "polygon",
+                spatialReference: { //had to set since data from query was a different projection
+                    wkid: 3857
+                },
+                renderer: {
+                    type: "simple",
+                    symbol:{
+                        type: "simple-fill",
+                        color: [ 120, 130, 200, 0.5 ],
+                        outline: {
                         color: "white",
                         width: .5
-                    },
-                };
-    
-                // TODO TEST ****************** // Shouldn't need this anymore because it was for the graphic & we converted the graphic result into a layer
-                // Set symbol and popup 
-                results.features.map((feature) => {
-                feature.symbol = symbol;
-                return feature;
-                });              
+                        }
+                    }                        
+                },
+                // these are defined again in displayHeightResults() but are needed here to pass data along
+                fields: [{  
+                    name: "OBJECTID",
+                    type: "oid"
+                }, {
+                    name: "Height_Stories",
+                    type: "integer"
+                }, {
+                    name: "Height_Feet",
+                    type: "integer"
+                }, {
+                    name: "Height_Name",
+                    type: "string"
+                }],
+                });
 
-                // If the "Zoning Heights" layer (the one with the subset that intersects the 1 mile buffer)
-                // already exists, remove it. This will make the old subset disappear when the user clicks a new parcel.                 
-                if (map.layers.length > initialMapLayersLength) {
-                    let zoningHeightLyrIndex = map.layers.findIndex(function(layer){
-                        return layer.title === "Allowed Heights";
-                    });
-                    let heightSubsetLyr = map.layers.at(zoningHeightLyrIndex);
-                    map.layers.remove(heightSubsetLyr);
-                }
-                            
-                // KEEP - this is a test set up during development to ensure the above code to remove the layer is working;
-                // keeping it in case adjustments to the layers are needed in the future 
-                // let layerList2 = []
-                // for (i=0; i<map.layers.length; i++) {
-                //     layerList2.push(map.layers.items[i].title)}             
-                // console.log("layerList2:")
-                // console.log(layerList2)
+            // add results to the map & use to create tables
+            map.add(resultsHeightLayer)
+            makeFeatureTables(resultsHeightLayer)
 
+            // update the dateDiv with the current date/time
+            const date = new Date()
+            dateDiv.innerHTML = `Results generated on: ${date}`
+            dateDiv.style.display = "inline"
+            
+        } // END displayHeightResults()
 
-                // create the new height layer from the query of which zoning districts intersect the 1 mile buffer
-                let resultsHeightLayer = new FeatureLayer({
-                    source: results.features,
-                    objectIdField: "OBJECTID",
-                    geometryType: "polygon",
-                    spatialReference: {
-                        wkid: 3857
-                    },
-                    renderer: {
-                        type: "simple",
-                        symbol:{
-                            type: "simple-fill",
-                            color: [ 120, 130, 200, 0.5 ],
-                            outline: {
-                            color: "white",
-                            width: .5
-                            }
-                        }                        
-                    },
-                    /// TEST - may not need these since they are defined in the new layer, but verify they aren't needed to pass data along.
-                    fields: [{  
-                      name: "OBJECTID",
-                    //   alias: "ObjectID",
-                      type: "oid"
-                    }, {
-                      name: "Height_Stories",
-                    //   alias: "Stories",
-                      type: "integer"
-                    }, {
-                        name: "Height_Feet",
-                        // alias: "Feet",
-                        type: "integer"
-                    }, {
-                        name: "Height_Name",
-                        // alias: "Name",
-                        type: "string"
-                    }],
-                  });
-
-                map.add(resultsHeightLayer)
-
-                makeFeatureTables(resultsHeightLayer)
-
-            } // END displayHeightResults()
 
             
+        //*********************************    
+        //   *** makeFeatureTables() *** 
+        //*********************************    
+        let featureTable, featureTable2 //global variables needed in function
+        function makeFeatureTables(resultsHeightLayer){
+
+            const featureLayer = resultsHeightLayer
+            featureLayer.title = "Allowed Heights";
             
-            //***********************************
-            let featureTable, featureTable2 //global variables needed in function
-            function makeFeatureTables(resultsHeightLayer){
 
-                const featureLayer = resultsHeightLayer
-                featureLayer.title = "Allowed Heights";
-                
-
-                // **********************************
-                //   CREATE FEATURE TABLE 1 (Feet) 
-                // **********************************
-                // create the table if this is a new query & update layer data if it is a repeat query
-                if (featureTable === undefined) { //the Feature Table doesn't yet exist
-                    // Create the feature table
-                    featureTable = new FeatureTable({
-                        layer: featureLayer,
-                        container: table1Div,
-                        view: view, // Required for feature highlight to work
-                        multiSortEnabled: true,
-                        visibleElements: {
-                            header: false
-                        },
-                        tableTemplate: {
-                            columnTemplates: [
-                                {
-                                    type: "field",
-                                    fieldName: "Height_Name",
-                                    label: "District Name",
-                                    direction: "asc",
-                                    initialSortPriority: 1  
-                                },
-                                {
-                                    type: "field",
-                                    fieldName: "Height_feet",
-                                    label: "Feet",
-                                    direction: "desc",
-                                    initialSortPriority: 0 
-                                },
-                            ]
-                        },
-                    });
-                    
-                }                
-                else { // the Feature Table already exists
-                    // redefine the layer property to use the newest set of queried zoning district features
-                    featureTable.layer = featureLayer
-                } // end 
-                
-
-                // *************************************
-                //   CREATE FEATURE TABLE 2 (Stories)
-                // *************************************
-                if (featureTable2 === undefined) { //the Feature Table doesn't yet exist
-                    // Create the feature table
-                    featureTable2 = new FeatureTable({
-                        view: view,
-                        layer: featureLayer,
-                        container: table2Div,
-                        multiSortEnabled: true,
-                        visibleElements: {
-                            header: false
-                        },
-                        tableTemplate: {
-                            columnTemplates: [
-                                {
+            // ***********************************
+            //   CREATE FEATURE TABLE #1 (Feet) 
+            // ***********************************
+            // create the table if this is a new query & update layer data if it is a repeat query
+            if (featureTable === undefined) { //the Feature Table doesn't yet exist
+                // Create the feature table
+                featureTable = new FeatureTable({
+                    layer: featureLayer,
+                    container: table1Div,
+                    view: view, // Required for feature highlight to work
+                    multiSortEnabled: true,
+                    visibleElements: {
+                        header: false
+                    },
+                    tableTemplate: {
+                        columnTemplates: [
+                            {
                                 type: "field",
                                 fieldName: "Height_Name",
                                 label: "District Name",
-                                direction: "asc",  //have to specify this to use initialSortPriority
-                                initialSortPriority: 1  //sort by this column second 
-                                },
-                                {
+                                direction: "asc",
+                                initialSortPriority: 1  
+                            },
+                            {
                                 type: "field",
-                                fieldName: "Height_Stories",
-                                label: "Stories", 
-                                direction: "desc",  //have to specify this to use initialSortPriority
-                                initialSortPriority: 0  //sort by this column second 
-                                },
-                            ]
-                        },
-                    });
-                }
-                else { // the Feature Table already exists
-                    // redefine the layer property to use the newest set of queried zoning district features
-                    featureTable2.layer = featureLayer
-                }    
-
-                table1Div.style.display = "flex"
-                table2Div.style.display = "flex"
+                                fieldName: "Height_feet",
+                                label: "Feet",
+                                direction: "desc",
+                                initialSortPriority: 0 
+                            },
+                        ]
+                    },
+                });
                 
-            } // END makeFeatureTables
+            }                
+
+            else { // the Feature Table already exists
+                // redefine the layer property to use the newest set of queried zoning district features
+                featureTable.layer = featureLayer
+            }          
+            // END FEATURE TABLE #1
+            
+
+            // **************************************
+            //   CREATE FEATURE TABLE #2 (Stories)
+            // **************************************
+            if (featureTable2 === undefined) { //the Feature Table doesn't yet exist
+                // Create the feature table
+                featureTable2 = new FeatureTable({
+                    view: view,
+                    layer: featureLayer,
+                    container: table2Div,
+                    multiSortEnabled: true,
+                    visibleElements: {
+                        header: false
+                    },
+                    tableTemplate: {
+                        columnTemplates: [
+                            {
+                            type: "field",
+                            fieldName: "Height_Name",
+                            label: "District Name",
+                            direction: "asc",  //have to specify this to use initialSortPriority
+                            initialSortPriority: 1  //sort by this column second 
+                            },
+                            {
+                            type: "field",
+                            fieldName: "Height_Stories",
+                            label: "Stories", 
+                            direction: "desc",  //have to specify this to use initialSortPriority
+                            initialSortPriority: 0  //sort by this column second 
+                            },
+                        ]
+                    },
+                });
+            }
+
+            else { // the Feature Table already exists
+                // redefine the layer property to use the newest set of queried zoning district features
+                featureTable2.layer = featureLayer
+            } 
+            // END FEATURE TABLE #2
+
+
+            // make tables visible since borders were showing on load & had to set initial display: "none"
+            table1Div.style.display = "flex"
+            table2Div.style.display = "flex"
+                
+            } // END makeFeatureTables()
 
 }); // END main function

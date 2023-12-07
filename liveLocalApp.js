@@ -44,7 +44,6 @@ require([
             url: "https://services.arcgis.com/ptvDyBs1KkcwzQNJ/arcgis/rest/services/zoning_heights_MultipartToSi/FeatureServer",
             visible: false,
             title: "Allowed Heights",
-            visible: false
         });
 
         
@@ -82,9 +81,10 @@ require([
             defaultCreateOptions: "click",
             visibleElements: {
                 selectionTools:{
-                  "lasso-selection": false,
-                  "rectangle-selection": false
+                    "lasso-selection": false,
+                    "rectangle-selection": false
                 },
+                duplicateButton: false,
                 settingsMenu: false,
                 undoRedoMenu: false,
               }
@@ -124,6 +124,27 @@ require([
             }
           };
 
+
+        //*********************
+        //   INSTRUCTION BOX
+        //*********************
+
+        const instructBtn = document.getElementById("instructBtn");
+        const instructDiv = document.getElementById("instructDiv");
+        const closeBtn = document.getElementById("closeBtn");
+
+        // When the user clicks on the button, open the modal
+        instructBtn.onclick = function () {
+            instructDiv.style.display = "flow";
+            instructBtn.disabled = true
+        };
+        
+        // When the user clicks on <span> (x), close the modal
+        closeBtn.onclick = function () {
+            instructDiv.style.display = "none";
+            instructBtn.disabled = false
+        };
+
           
         //***************************
         //   CREATE OTHER WIDGETS
@@ -140,7 +161,7 @@ require([
 
         // put the legend in an expand widget so it is hidden by default
         const legendExpand = new Expand({
-            expandIconClass: "esri-icon-legend",
+            expandIcon: "legend",
             expandTooltip: "Legend",
             view: view,
             content: legend
@@ -159,12 +180,14 @@ require([
         view.ui.empty("top-left");
         view.ui.add(table1Div, "manual");
         view.ui.add(table2Div, "manual");
+        view.ui.add(instructDiv, "manual");
         view.ui.add(titleDiv, "top-left");
         view.ui.add(parcelInfoDiv, "top-left");
         view.ui.add(zoom, "bottom-left");
         view.ui.add(home, "bottom-left");
         view.ui.add(legendExpand, "bottom-left");
         view.ui.add(searchWidget, "bottom-left",);
+        view.ui.add(instructBtn, "bottom-left");
         view.ui.add(scaleBar, "bottom-right");
         view.ui.add(dateDiv, "bottom-right");
         view.ui.add(sketch, "top-right");
@@ -283,7 +306,7 @@ require([
             const heightQuery = {
                 spatialRelationship: "intersects", // Relationship operation to apply
                 geometry: buffer,  
-                outFields: ["OBJECTID","ZONED", "ZONING", "Height_Name", "Height_Stories", "Height_Feet"], // Attributes to return
+                outFields: ["OBJECTID", "ZONED", "ZONING", "Height_Name", "Height_Stories", "Height_Feet"], // Attributes to return
                 returnGeometry: true
             };
             
@@ -305,22 +328,6 @@ require([
         //************************************
         let initialMapLayersLength = map.layers.length //global variable needed in function
         function displayHeightResults(results) {
-            
-            // Create polygon symbols
-            const symbol = {
-                type: "simple-fill",
-                color: [ 120, 130, 200, 0.5 ],
-                outline: {
-                    color: "white",
-                    width: .5
-                },
-            };
-
-            // set symbol (can also set pop-up here) 
-            results.features.map((feature) => {
-            feature.symbol = symbol;
-            return feature;
-            });              
 
             // If the "Allowed Heights" layer (the one with the subset that intersects the 1 mile buffer)
             // already exists, remove it. This will make the old subset disappear when the user clicks a new parcel.                 
@@ -331,6 +338,32 @@ require([
                 let heightSubsetLyr = map.layers.at(zoningHeightLyrIndex);
                 map.layers.remove(heightSubsetLyr);
             }
+            
+            // polygon symbol definition
+            const symbol = {
+                type: "simple-fill",
+                color: [ 120, 130, 200, 0.5 ],
+                outline: {
+                    color: "white",
+                    width: .5
+                },
+            };
+
+            // label definition
+            const heightsLabelClass = {
+                symbol: {
+                    type: "text",
+                    color: "dimgray",
+                    font: {
+                        size: 8,
+                        weight: "bold"
+                    }
+                },
+                // labelPlacement: "above-center",
+                labelExpressionInfo: {
+                    expression: "$feature.ZONING"
+                }
+            };        
                         
             // create the new height layer from the query of which zoning districts intersect the 1 mile buffer
             let resultsHeightLayer = new FeatureLayer({
@@ -342,19 +375,15 @@ require([
                 },
                 renderer: {
                     type: "simple",
-                    symbol:{
-                        type: "simple-fill",
-                        color: [ 120, 130, 200, 0.5 ],
-                        outline: {
-                        color: "white",
-                        width: .5
-                        }
-                    }                        
+                    symbol: symbol                      
                 },
-                // these are defined again in displayHeightResults() but are needed here to pass data along
+                labelingInfo: [heightsLabelClass],
                 fields: [{  
                     name: "OBJECTID",
                     type: "oid"
+                }, {
+                    name: "ZONING",
+                    type: "string"
                 }, {
                     name: "Height_Stories",
                     type: "integer"
@@ -400,7 +429,6 @@ require([
                     layer: featureLayer,
                     container: table1Div,
                     view: view, // Required for feature highlight to work
-                    multiSortEnabled: true,
                     visibleElements: {
                         header: false
                     },
@@ -442,7 +470,6 @@ require([
                     view: view,
                     layer: featureLayer,
                     container: table2Div,
-                    multiSortEnabled: true,
                     visibleElements: {
                         header: false
                     },
@@ -473,10 +500,12 @@ require([
             } 
             // END FEATURE TABLE #2
 
+            // update table titles
+            let table1Title = document.getElementsByClassName("tableTitle")[0] 
+            let table2Title = document.getElementsByClassName("tableTitle")[1] 
 
-            // make tables visible since borders were showing on load & had to set initial display: "none"
-            table1Div.style.display = "flex"
-            table2Div.style.display = "flex"
+            table1Title.innerHTML = "Allowed Height in Feet"
+            table2Title.innerHTML = "Allowed Height in Stories"
                 
             } // END makeFeatureTables()
 

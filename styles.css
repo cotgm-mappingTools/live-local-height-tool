@@ -1,5 +1,4 @@
-html,
-body {
+html, body {
   padding: 0;
   margin: 0;
   height: 100%;
@@ -11,7 +10,7 @@ body {
   width: 100%;
 }
 
-#titleDiv, #parcelInfoDiv, #dateDiv{
+#titleDiv, #parcelInfoDiv, #dateDiv, #instructBtn{
   padding: 5px 10px 5px 10px;
   background-color: dimgrey;
   color: azure;
@@ -22,27 +21,72 @@ body {
 
 #titleDiv{
   font-size: x-large;
-  font-weight: bold;
-  
+  font-weight: bold;  
 }
 
-#parcelInfoDiv{
+#parcelInfoDiv, #dateDiv{
   font-size: medium;
   display: none;
 }  
 
-#dateDiv{
-  font-size: medium;
-  display: none;
-}  
+#instructDiv{
+  height: 50%;
+  width: 20%;
+  left: 2.5%;
+  top: 23%;
+  background-color: lightgray ;
+  border: 6px solid dimgray;
+  border-radius: 10px;
+  box-shadow: 5px 5px 5px black;
+  margin: 5px;
+  overflow: auto;
+  /* display: none; */
+}
+
+#instructDiv > p, h3{
+  padding: 10px;
+  text-align: center;
+}
+
+#instructDiv > img{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#instructDiv > h3{
+  text-align: center;
+}
+
+#instructBtn:hover{
+  background-color: gray;
+}
+
+#closeBtn {
+  color: dimgray;
+  float: right;
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 5px;
+  margin-right: 5px;
+  background-color: lightgray;
+  border: 1px solid gray;
+  border-radius: 5px;
+}
+
+#closeBtn:hover{
+  background-color: whitesmoke;
+}
+
 
 #table1Div, #table2Div{
   height: 30%;
-  width: 350px;
+  width: 360px;
   right: 1%;
   border: 6px solid dimgray;
   border-radius: 10px;
-  display: none;
+  background-color: lightgray;
+  padding: 5px;
 }
 
 #table1Div{
@@ -53,6 +97,19 @@ body {
   bottom: 15%
 }
 
+.tableTitle{
+  background-color: lightgray;
+  text-align: center;
+  margin: auto;
+  font-size: medium;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+/* hide the secondary info panel of the sketch widget that pops up when user selects a parcel */
+/* div.esri-sketch__panel.esri-sketch__info-panel{
+  display: none */
+/* }  */
 
 
 /******************
@@ -69,10 +126,6 @@ div.esri-column__menu-container.esri-button-menu.esri-widget {
   display: none;
 }
 
-/* hide the secondary info panel of the sketch widget that pops up when user selects a parcel */
-div.esri-sketch__panel.esri-sketch__info-panel{
-  display: none
-} 
 
 /* change featureTable font size */
 /* vaadin-grid-cell-content {

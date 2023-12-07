@@ -21,15 +21,36 @@
 
     <body>
       <div class="container" id="table1Container">
-        <div id="table1Div"></div>
+        <div id="table1Div">
+          <div class="tableTitle esri-widget">Allowed height in feet for each zoning district will show here.</div>
+        </div>
       </div>
       <div class="container" id="table2Container">
-        <div id="table2Div"></div>
+        <div id="table2Div">
+          <div class="tableTitle esri-widget">Allowed height in stories for each zoning district will show here.</div>
+        </div>
       </div>
       <div id="viewDiv">
         <div class="esri-widget" id="titleDiv">Live Local Act Height Allowances for Tallahassee, Florida</div>
         <div class="esri-widget" id="parcelInfoDiv">Parcel Info</div>
-        <div class="esri-widget" id="dateDiv">Results Generated on: </div>
+        <div class="esri-widget" id="dateDiv"></div>
+        <button type="button" class="esri-widget" id="instructBtn">Instructions</button>
+        <div class="esri-widget" id="instructDiv">
+          <button type="button" id="closeBtn">&times;</button>
+          <h3>How to Use this Tool</h3>
+          <p>You will mainly use the two buttons in the top, right corner.</p>
+          <img src="selectBtn.png" alt="example of how to use selection buttons" width="50">
+          <p>The “Select Feature” button is active when the page loads. 
+            Use it to click on a parcel and open the popup to see parcel details. Only eligible parcels are shown on the map.</p>
+          <img src="drawBtn.png" alt="example of how to use selection buttons" width="50">
+          <p>To run a height analysis, click the “Draw a Point” button and then click the parcel of interest.  
+            To analyze another parcel, click this button again and place a point on a new parcel.
+          </p>
+          <img src="search.png" alt="example of how to use selection buttons" width="200">
+          <p>Using the search bar will place you at the selected address but you will still need to click the
+            "Draw a Point" button and select an eligible parcel.</p>
+          <p>Since some zoning districts measure height in feet and others in stories, both are shown in the results tables.</p>
+        </div>
       </div>
       </body>
     </body>

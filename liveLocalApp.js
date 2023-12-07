@@ -35,10 +35,17 @@ require([
         //     url: "https://intervector.leoncountyfl.gov/intervector/rest/services/MapServices/TLC_OverlayParnal_D_WM/MapServer/0",
         //     popupTemplate: popupTemplate,
         // });
-        const parcelLayer = new FeatureLayer({ // city only (my test layer)
-            url: "https://services.arcgis.com/ptvDyBs1KkcwzQNJ/arcgis/rest/services/PropertyParcel_CityOnly_112823/FeatureServer",
+        // const parcelLayer = new FeatureLayer({ // city only (my test layer)
+        //     url: "https://services.arcgis.com/ptvDyBs1KkcwzQNJ/arcgis/rest/services/PropertyParcel_CityOnly_112823/FeatureServer",
+        //     popupTemplate: popupTemplate,
+        // });
+        const parcelLayer = new FeatureLayer({ // property information layer
+            url: "https://intervector.leoncountyfl.gov/intervector/rest/services/MapServices/TLC_OverlayPropInfo_Enhanced_D_WM/MapServer/1",
+            // portalItem: {id: "05f151475d734fe6970bf78f36642bc9"},
             popupTemplate: popupTemplate,
         });
+
+        console.log(parcelLayer)
 
         const heightLayer = new FeatureLayer({
             url: "https://services.arcgis.com/ptvDyBs1KkcwzQNJ/arcgis/rest/services/zoning_heights_MultipartToSi/FeatureServer",
@@ -53,8 +60,6 @@ require([
 
         const map = new Map({
             basemap: "streets-relief-vector",
-            // basemap: "gray-vector",
-            // basemap: "arcgis/topographic" // basemap styles service
             layers: [parcelLayer, heightLayer]
         });
         
@@ -207,7 +212,8 @@ require([
             const parcelQuery = {
                 spatialRelationship: "intersects", // Relationship operation to apply
                 geometry: geometry,  // The sketch feature geometry
-                outFields: ["TAXID_LABE","SITEADDR","CALC_ACREA"], // Attributes to return
+                outFields: ["TAXID","SITEADDR"], // Attributes to return
+                // outFields: ["TAXID_LABE","SITEADDR","CALC_ACREA"], // Attributes to return
                 returnGeometry: true
             };
             
@@ -507,6 +513,6 @@ require([
             table1Title.innerHTML = "Allowed Height in Feet"
             table2Title.innerHTML = "Allowed Height in Stories"
                 
-            } // END makeFeatureTables()
+        } // END makeFeatureTables()
 
 }); // END main function

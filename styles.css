@@ -78,9 +78,8 @@ html, body {
   background-color: whitesmoke;
 }
 
-
 #table1Div, #table2Div{
-  height: 30%;
+  height: 28%;
   width: 360px;
   right: 1%;
   border: 6px solid dimgray;

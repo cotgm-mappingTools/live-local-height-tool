@@ -28,7 +28,7 @@ require([
 
         const popupTemplate = {
             title: "Parcel {TAXID}",
-            content: "Site Address: {FIRST_SITEADDR} <br>Tax ID: {TAXID} <br>ZONED: {FIRST_ZONEDES1} <br>Property Use: {FIRST_PROPDESC} "
+            content: "Site Address: {FIRST_SITEADDR} <br>Tax ID: {TAXID} <br>Zoning: {FIRST_ZONEDES1} ({FIRST_ZONING1}) <br>Property Use: {FIRST_PROPDESC} "
         };
 
         const parcelRenderer = {

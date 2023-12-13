@@ -61,6 +61,7 @@ require([
             popupTemplate: popupTemplate,
             renderer: parcelRenderer,
             minScale: 0, 
+            title: "Eligible Parcels"
         });
 
         const heightLayer = new FeatureLayer({
@@ -69,6 +70,21 @@ require([
             title: "Allowed Heights",
         });
 
+        const cityLimits = new FeatureLayer({
+            url: "https://intervector.leoncountyfl.gov/intervector/rest/services/MapServices/TLC_Overlay_Citylimits_WM_D/MapServer/0",
+            title: "City Limits",
+            renderer: {
+                type: "simple",
+                symbol: {
+                  type: "simple-fill",
+                  color: null,
+                  outline: {
+                      color: "grey",
+                      width: 2
+                  }
+                }
+            }
+        });
         
         //***********************
         //   CREATE MAP & VIEW  
@@ -76,7 +92,7 @@ require([
 
         const map = new Map({
             basemap: "streets-relief-vector",
-            layers: [parcelLayer, heightLayer]
+            layers: [cityLimits, parcelLayer, heightLayer]
         });
         
         const view = new MapView({
@@ -173,6 +189,7 @@ require([
         //***************************
         //   CREATE OTHER WIDGETS
         //***************************
+        const tablePlaceholder = document.getElementById("tablePlaceholder");
         const table1Div = document.getElementById("table1Div");
         const table2Div = document.getElementById("table2Div");
         const titleDiv = document.getElementById("titleDiv");
@@ -202,6 +219,7 @@ require([
         //   ADD WIDGETS TO USER INTERFACE  
         //***********************************
         view.ui.empty("top-left");
+        view.ui.add(tablePlaceholder, "manual");
         view.ui.add(table1Div, "manual");
         view.ui.add(table2Div, "manual");
         view.ui.add(instructDiv, "manual");
@@ -332,7 +350,7 @@ require([
                 spatialRelationship: "intersects", // Relationship operation to apply
                 geometry: buffer,  
                 outFields: ["OBJECTID", "ZONED", "ZONING", "Height_Name", "Height_Stories", "Height_Feet"], // Attributes to return
-                returnGeometry: true
+                returnGeometry: true,
             };
             
             heightLayer.queryFeatures(heightQuery)
@@ -393,6 +411,7 @@ require([
             // create the new height layer from the query of which zoning districts intersect the 1 mile buffer
             let resultsHeightLayer = new FeatureLayer({
                 source: results.features,
+                title: "Zoning Districts Within 1 Mile",
                 objectIdField: "OBJECTID",
                 geometryType: "polygon",
                 spatialReference: { //had to set since data from query was a different projection
@@ -441,7 +460,7 @@ require([
         function makeFeatureTables(resultsHeightLayer){
 
             const featureLayer = resultsHeightLayer
-            featureLayer.title = "Allowed Heights";
+            // featureLayer.title = "Zoning Districts Within 1 Mile";
             
 
             // ***********************************
@@ -525,12 +544,17 @@ require([
             } 
             // END FEATURE TABLE #2
 
-            // update table titles
-            let table1Title = document.getElementsByClassName("tableTitle")[0] 
-            let table2Title = document.getElementsByClassName("tableTitle")[1] 
+            // make tables visible & placeholder invisible
+            table1Div.style.display = "flex";
+            table2Div.style.display = "flex";
+            tablePlaceholder.style.display = "none";
 
-            table1Title.innerHTML = "Allowed Height in Feet"
-            table2Title.innerHTML = "Allowed Height in Stories"
+            // update table titles
+            // let table1Title = document.getElementsByClassName("tableTitle")[0] 
+            // let table2Title = document.getElementsByClassName("tableTitle")[1] 
+
+            // table1Title.innerHTML = "Allowed Height in Feet"
+            // table2Title.innerHTML = "Allowed Height in Stories"
                 
         } // END makeFeatureTables()
 

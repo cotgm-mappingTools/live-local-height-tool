@@ -29,6 +29,11 @@ html, body {
   display: none;
 }  
 
+
+/********************
+   INSTRUCTION BOX
+********************/
+
 #instructDiv{
   height: 50%;
   width: 20%;
@@ -86,6 +91,23 @@ html, body {
   background-color: whitesmoke;
 }
 
+
+/******************
+   TABLE BOXES
+******************/
+
+#tablePlaceholder{
+  /* height: %; */
+  top: 40%;
+  width: 15%;
+  right: 1%;
+  border: 6px solid dimgray;
+  border-radius: 10px;
+  background-color: lightgray;
+  padding: 5px;
+  text-align: center;
+}
+
 #table1Div, #table2Div{
   height: 28%;
   width: 360px;
@@ -94,6 +116,7 @@ html, body {
   border-radius: 10px;
   background-color: lightgray;
   padding: 5px;
+  display: none;
 }
 
 #table1Div{

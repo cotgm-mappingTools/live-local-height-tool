@@ -62,6 +62,14 @@ html, body {
   background-color: gray;
 }
 
+#instructBtn:disabled{
+  color: lightgray;
+}
+
+#instructBtn:disabled:hover{
+  background-color: dimgray;
+}
+
 #closeBtn {
   color: dimgray;
   float: right;

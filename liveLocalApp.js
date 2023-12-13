@@ -27,25 +27,41 @@ require([
         //*************************
 
         const popupTemplate = {
-            title: "Parcel {TAXID_LABE}",
-            content: "Site Address: {SITEADDR} <br> Acreage: {CALC_ACREA}"
+            title: "Parcel {TAXID}",
+            content: "Site Address: {FIRST_SITEADDR} <br>Tax ID: {TAXID} <br>ZONED: {FIRST_ZONEDES1} <br>Property Use: {FIRST_PROPDESC} "
         };
 
-        // const parcelLayer = new FeatureLayer({ // authoritative layer
-        //     url: "https://intervector.leoncountyfl.gov/intervector/rest/services/MapServices/TLC_OverlayParnal_D_WM/MapServer/0",
-        //     popupTemplate: popupTemplate,
-        // });
-        // const parcelLayer = new FeatureLayer({ // city only (my test layer)
-        //     url: "https://services.arcgis.com/ptvDyBs1KkcwzQNJ/arcgis/rest/services/PropertyParcel_CityOnly_112823/FeatureServer",
-        //     popupTemplate: popupTemplate,
-        // });
-        const parcelLayer = new FeatureLayer({ // property information layer
-            url: "https://intervector.leoncountyfl.gov/intervector/rest/services/MapServices/TLC_OverlayPropInfo_Enhanced_D_WM/MapServer/1",
-            // portalItem: {id: "05f151475d734fe6970bf78f36642bc9"},
-            popupTemplate: popupTemplate,
-        });
+        const parcelRenderer = {
+            type: "simple",
+            symbol: {
+              type: "simple-fill",
+              color: "red",
+            //   color: [ 174, 182, 191, 0.5 ],
+            //   color: [ 8, 143, 243, 0.5 ],
+              outline: {
+                  color: "black",
+                  width: .25
+              }
+            }
+        };
 
-        console.log(parcelLayer)
+        // const parcelLayer = new FeatureLayer({ // property information layer
+        //     url: "https://intervector.leoncountyfl.gov/intervector/rest/services/MapServices/TLC_OverlayPropInfo_Enhanced_D_WM/MapServer/1",
+        //     // definitionExpression:   "ZONED in ( 'AC', 'CU-12', 'CU-18', 'CU-26', 'CU-45', 'UT', 'R-4', 'MR-1', 'OR-1', 'OR-2', 'OR-3', 'OA-1', 'C-1', 'C-2', 'CM', \
+        //     //                                     'CP', 'UP-1', 'UP-2', 'M-1', 'PUD', 'U-PUD', 'IC', 'NBO', 'MR', 'MCN', 'GO-1', 'GO-2', 'NB-1', 'ASN-A', 'ASN-B', \
+        //     //                                     'ASN-C', 'ASN-D', 'CC', 'SCD', 'UV', 'I', 'DRI', 'R' , 'UF') AND CITYINOUT = 'IN'",           
+        //     // minScale: 0, 
+        //     outFields:["TAXID", "SITEADDR", "SHAPE"],         
+        //     popupTemplate: popupTemplate,
+        //     renderer: parcelRenderer
+        // });
+        
+        const parcelLayer = new FeatureLayer({ // Subset of property information layer
+            url: "https://services.arcgis.com/ptvDyBs1KkcwzQNJ/arcgis/rest/services/PropInfo_eligible_parcels_dissolved/FeatureServer",
+            popupTemplate: popupTemplate,
+            renderer: parcelRenderer,
+            minScale: 0, 
+        });
 
         const heightLayer = new FeatureLayer({
             url: "https://services.arcgis.com/ptvDyBs1KkcwzQNJ/arcgis/rest/services/zoning_heights_MultipartToSi/FeatureServer",
@@ -67,7 +83,7 @@ require([
             container: "viewDiv",
             map: map,
             center: [-84.275, 30.45], //Longitude, latitude
-            zoom: 15
+            zoom: 13
         });
         
         
@@ -122,7 +138,7 @@ require([
 
         const bufferSym = {
             type: "simple-fill", // autocasts as new SimpleFillSymbol()
-            color: [240, 140, 222, 0.5],
+            color: [240, 140, 222, 0.25],
             outline: {
               color: [0, 0, 0, 0.5],
               width: 2
@@ -137,6 +153,9 @@ require([
         const instructBtn = document.getElementById("instructBtn");
         const instructDiv = document.getElementById("instructDiv");
         const closeBtn = document.getElementById("closeBtn");
+
+        // since instruction panel is open by default, disable the button at first
+        instructBtn.disabled = true
 
         // When the user clicks on the button, open the modal
         instructBtn.onclick = function () {
@@ -212,8 +231,7 @@ require([
             const parcelQuery = {
                 spatialRelationship: "intersects", // Relationship operation to apply
                 geometry: geometry,  // The sketch feature geometry
-                outFields: ["TAXID","SITEADDR"], // Attributes to return
-                // outFields: ["TAXID_LABE","SITEADDR","CALC_ACREA"], // Attributes to return
+                outFields: ["TAXID","FIRST_SITEADDR"], // Attributes to return
                 returnGeometry: true
             };
             
@@ -222,7 +240,8 @@ require([
                               
                 displayParcelResults(results);
                 
-            }).catch((error) => {
+            })
+            .catch((error) => {
                 console.log(error);
             });
             
@@ -253,8 +272,8 @@ require([
             });
             
             // update the parcelInfoDiv with the address & taxID of the selected parcel & make it visible
-            const parcelAddress = results.features[0].attributes.SITEADDR
-            const parcelID = results.features[0].attributes.TAXID_LABE        
+            const parcelAddress = results.features[0].attributes.FIRST_SITEADDR
+            const parcelID = results.features[0].attributes.TAXID        
             parcelInfoDiv.innerHTML = `<b>Showing Results for:</b> ${parcelAddress} (Tax ID: ${parcelID})`
             parcelInfoDiv.style.display = "inline"
                      
@@ -348,9 +367,9 @@ require([
             // polygon symbol definition
             const symbol = {
                 type: "simple-fill",
-                color: [ 120, 130, 200, 0.5 ],
+                color: [ 120, 130, 200, 0.25 ],
                 outline: {
-                    color: "white",
+                    color: [ 120, 130, 200, 1 ],
                     width: .5
                 },
             };

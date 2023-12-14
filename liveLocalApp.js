@@ -195,8 +195,8 @@ require([
         const resetBtn = document.getElementById("resetBtn")
         
         resetBtn.onclick = () => { 
-            map.layers = [cityLimits, parcelLayer, heightLayer]
             view.graphics.removeAll() // removes the selected parcel highlights
+            bufferLayer.graphics.removeAll() // removes the buffer circle graphic
             sketch.complete() // closes the sketch info panel, if open
             view.closePopup()
             view.center = mapCenter
@@ -208,8 +208,12 @@ require([
             instructDiv.style.display = "flow"
             tablePlaceholder.style.display = "flow"
             resetBtn.style.display = "none"
+
+            // reset the layers; using this because .remove() isn't working - need to review why
+            map.layers = [cityLimits, parcelLayer, heightLayer, graphicsLayerSketch, bufferLayer]
         }
         
+
         //***************************
         //   CREATE OTHER WIDGETS
         //***************************
@@ -364,7 +368,7 @@ require([
                 
                 // find the zoning districts that intersect with the buffer
                 queryHeightLayer(buffer)
-                
+
         } // END BufferParcel()
 
 
@@ -400,11 +404,11 @@ require([
         let initialMapLayersLength = map.layers.length //global variable needed in function
         function displayHeightResults(results) {
 
-            // If the "Allowed Heights" layer (the one with the subset that intersects the 1 mile buffer)
-            // already exists, remove it. This will make the old subset disappear when the user clicks a new parcel.                 
+            // If the "Zoning Districts Within 1 Mile" layer already exists, remove it. 
+            // This will make the old subset disappear when the user clicks a new parcel.                 
             if (map.layers.length > initialMapLayersLength) {
                 let zoningHeightLyrIndex = map.layers.findIndex(function(layer){
-                    return layer.title === "Allowed Heights";
+                    return layer.title === "Zoning Districts Within 1 Mile";
                 });
                 let heightSubsetLyr = map.layers.at(zoningHeightLyrIndex);
                 map.layers.remove(heightSubsetLyr);
@@ -416,7 +420,7 @@ require([
                 color: [ 120, 130, 200, 0.25 ],
                 outline: {
                     color: [ 120, 130, 200, 1 ],
-                    width: .5
+                    width: 1
                 },
             };
 
@@ -424,6 +428,7 @@ require([
             const heightsLabelClass = {
                 symbol: {
                     type: "text",
+                    // color: [ 120, 130, 200, 1 ],
                     color: "dimgray",
                     font: {
                         size: 8,

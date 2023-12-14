@@ -35,7 +35,8 @@ require([
             type: "simple",
             symbol: {
               type: "simple-fill",
-              color: "red",
+              color: [255, 99, 71, 1],
+            //   color: "red",
               outline: {
                   color: "black",
                   width: .25
@@ -76,6 +77,7 @@ require([
                 symbol: {
                   type: "simple-fill",
                   color: null,
+                  color: [247, 135, 2, .15],
                   outline: {
                       color: "grey",
                       width: 2

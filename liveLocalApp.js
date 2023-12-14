@@ -27,8 +27,8 @@ require([
         //*************************
 
         const popupTemplate = {
-            title: "Parcel {TAXID}",
-            content: "Site Address: {FIRST_SITEADDR} <br>Tax ID: {TAXID} <br>Zoning: {FIRST_ZONEDES1} ({FIRST_ZONING1}) <br>Property Use: {FIRST_PROPDESC} "
+            title: "Parcel TaxID:  {TAXID}",
+            content: "Site Address: {FIRST_SITEADDR} <br>Zoning: {FIRST_ZONEDES1} ({FIRST_ZONING1}) <br>Property Use: {FIRST_PROPDESC} "
         };
 
         const parcelRenderer = {
@@ -36,8 +36,6 @@ require([
             symbol: {
               type: "simple-fill",
               color: "red",
-            //   color: [ 174, 182, 191, 0.5 ],
-            //   color: [ 8, 143, 243, 0.5 ],
               outline: {
                   color: "black",
                   width: .25
@@ -90,7 +88,7 @@ require([
         //   CREATE MAP & VIEW  
         //***********************
 
-        const mapCenter = [-84.275, 30.45]; //Longitude, latitude:
+        const mapCenter = [-84.29, 30.44]; //Longitude, latitude:
         const zoomLevel = 13;
 
         const map = new Map({
@@ -209,7 +207,7 @@ require([
             tablePlaceholder.style.display = "flow"
             resetBtn.style.display = "none"
 
-            // reset the layers; using this because .remove() isn't working - need to review why
+            // reset the layers; using this because .remove(resultsHeightLyr) isn't working - need to review why
             map.layers = [cityLimits, parcelLayer, heightLayer, graphicsLayerSketch, bufferLayer]
         }
         

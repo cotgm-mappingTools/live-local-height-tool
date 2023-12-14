@@ -10,7 +10,7 @@ html, body {
   width: 100%;
 }
 
-#titleDiv, #parcelInfoDiv, #dateDiv, #instructBtn{
+#titleDiv, #parcelInfoDiv, #dateDiv, #instructBtn, #resetBtn{
   padding: 5px 10px 5px 10px;
   background-color: dimgrey;
   color: azure;
@@ -28,6 +28,14 @@ html, body {
   font-size: medium;
   display: none;
 }  
+
+#resetBtn:hover{
+  background-color: gray;
+}
+
+#resetBtn {
+  display: none;
+}
 
 
 /********************
@@ -97,8 +105,7 @@ html, body {
 ******************/
 
 #tablePlaceholder{
-  /* height: %; */
-  top: 40%;
+  top: 43%;
   width: 15%;
   right: 1%;
   border: 6px solid dimgray;

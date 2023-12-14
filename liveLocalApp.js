@@ -90,6 +90,9 @@ require([
         //   CREATE MAP & VIEW  
         //***********************
 
+        const mapCenter = [-84.275, 30.45]; //Longitude, latitude:
+        const zoomLevel = 13;
+
         const map = new Map({
             basemap: "streets-relief-vector",
             layers: [cityLimits, parcelLayer, heightLayer]
@@ -98,8 +101,8 @@ require([
         const view = new MapView({
             container: "viewDiv",
             map: map,
-            center: [-84.275, 30.45], //Longitude, latitude
-            zoom: 13
+            center: mapCenter,
+            zoom: zoomLevel
         });
         
         
@@ -159,42 +162,63 @@ require([
               color: [0, 0, 0, 0.5],
               width: 2
             }
-          };
+        };
 
 
         //*********************
         //   INSTRUCTION BOX
         //*********************
-
+        
         const instructBtn = document.getElementById("instructBtn");
         const instructDiv = document.getElementById("instructDiv");
         const closeBtn = document.getElementById("closeBtn");
-
+        
         // since instruction panel is open by default, disable the button at first
         instructBtn.disabled = true
-
+        
         // When the user clicks on the button, open the modal
-        instructBtn.onclick = function () {
+        instructBtn.onclick = () => {
             instructDiv.style.display = "flow";
-            instructBtn.disabled = true
-        };
+            instructBtn.disabled = true;
+        }
         
         // When the user clicks on <span> (x), close the modal
-        closeBtn.onclick = function () {
+        closeBtn.onclick = () => {
             instructDiv.style.display = "none";
-            instructBtn.disabled = false
-        };
-
-          
+            instructBtn.disabled = false;
+        }
+        
+        
+        //*******************
+        //   RESET BUTTON
+        //*******************
+        const resetBtn = document.getElementById("resetBtn")
+        
+        resetBtn.onclick = () => { 
+            map.layers = [cityLimits, parcelLayer, heightLayer]
+            view.graphics.removeAll() // removes the selected parcel highlights
+            sketch.complete() // closes the sketch info panel, if open
+            view.closePopup()
+            view.center = mapCenter
+            view.zoom = zoomLevel
+            table1Div.style.display = "none"
+            table2Div.style.display = "none"
+            dateDiv.style.display = "none"
+            parcelInfoDiv.style.display = "none"
+            instructDiv.style.display = "flow"
+            tablePlaceholder.style.display = "flow"
+            resetBtn.style.display = "none"
+        }
+        
         //***************************
         //   CREATE OTHER WIDGETS
         //***************************
+        const parcelInfoDiv = document.getElementById("parcelInfoDiv")
+        const dateDiv = document.getElementById("dateDiv")
         const tablePlaceholder = document.getElementById("tablePlaceholder");
         const table1Div = document.getElementById("table1Div");
         const table2Div = document.getElementById("table2Div");
         const titleDiv = document.getElementById("titleDiv");
-        const parcelInfoDiv = document.getElementById("parcelInfoDiv");
-        const dateDiv = document.getElementById("dateDiv");
         const searchWidget = new Search({view: view});
         const zoom = new Zoom({view: view});
         const home = new Home({view: view});
@@ -212,7 +236,7 @@ require([
         const scaleBar = new ScaleBar({
             view: view,
             unit: "imperial"
-          });
+        });
 
         
         //***********************************
@@ -233,6 +257,7 @@ require([
         view.ui.add(scaleBar, "bottom-right");
         view.ui.add(dateDiv, "bottom-right");
         view.ui.add(sketch, "top-right");
+        view.ui.add(resetBtn, "top-right");
         
 
 
@@ -255,7 +280,7 @@ require([
             
             parcelLayer.queryFeatures(parcelQuery)
             .then((results) => {
-                              
+                            
                 displayParcelResults(results);
                 
             })
@@ -294,16 +319,19 @@ require([
             const parcelID = results.features[0].attributes.TAXID        
             parcelInfoDiv.innerHTML = `<b>Showing Results for:</b> ${parcelAddress} (Tax ID: ${parcelID})`
             parcelInfoDiv.style.display = "inline"
-                     
+                    
             // create the buffer around the parcel
             bufferParcel(results.features[0].geometry);
             
             // Clear display
-            // view.closePopup();
+            view.closePopup();
             view.graphics.removeAll();
             
             // Add features to graphics layer
             view.graphics.addMany(results.features);
+
+            // make reset button functional
+            resetBtn.style.display = "flow"
             
         } // END displayParcelResults()
         

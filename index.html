@@ -20,13 +20,14 @@
     </head>
 
     <body>
+      <div type="button" id="resetBtn">Reset</div>
       <div class="container" id="table1Container">
-        <div id="table1Div">
+        <div id="table1Div" class="featureTable">
           <div class="tableTitle esri-widget">Allowed Height in Feet</div>
         </div>
       </div>
       <div class="container" id="table2Container">
-        <div id="table2Div">
+        <div id="table2Div" class="featureTable">
           <div class="tableTitle esri-widget">Allowed Height in Stories</div>
         </div>
       </div>
@@ -52,7 +53,9 @@
           <img src="search.png" alt="example of how to use selection buttons" width="200">
           <p>Using the search bar will place you at the selected address but you will still need to click the
             "Draw a Point" button and select an eligible parcel.</p>
-          <p>Since some zoning districts measure height in feet and others in stories, both are shown in the results tables.</p>
+          <img src="trashBtn.png" alt="example of how to use selection buttons" width="100">
+          <p>If you want to remove the blue button where you created the initial point, press the "Delete Feature" 
+            button that opens in the top, right panel. It will remove the blue point but leave the selected parcel, buffer & zoning districts. </p>
         </div>
       </div>
       </body>
